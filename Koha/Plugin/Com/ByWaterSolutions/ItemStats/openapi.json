@@ -1,0 +1,30 @@
+{
+  "/itemstats/{item_id}":{
+    "get":{
+      "x-mojo-to":"Com::ByWaterSolutions::ItemStats::Controller#get",
+      "operationId":"GetItemStats",
+      "tags":[
+        "itemstats"
+      ],
+      "produces": [
+        "application/json"
+      ],
+      "parameters": [
+        {
+          "name": "item_id",
+          "in": "path",
+          "required": true,
+          "type": "string"
+        }
+      ],
+      "responses":{
+        "200":{
+          "description":"Item stats"
+        },
+        "500":{
+          "description":"An error occured"
+        }
+      }
+    }
+  }
+}
