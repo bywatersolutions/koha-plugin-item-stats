@@ -16,11 +16,11 @@ our $VERSION = "{VERSION}";
 
 ## Here is our metadata, some keys are required, some are optional
 our $metadata = {
-    name          => 'Pay Via Govolution',
+    name          => 'Item statistics',
     author        => 'Nick Clemens',
-    description   => 'This plugin enables online OPAC fee payments via Govolution',
+    description   => 'This plugin adds a popup to calculate yearly statistics for an item',
     date_authored => '2023-05-30',
-    date_updated  => '1900-01-01',
+    date_updated  => '2024-01-03',
     minimum_version => '22.05.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -51,10 +51,8 @@ sub configure {
 
         ## Grab the values we already have for our settings, if any exist
         $template->param(
-            application_id => $self->retrieve_data('application_id'),
-            enable_opac_payments => $self->retrieve_data('enable_opac_payments'),
-            url => $self->retrieve_data('url'),
-            debug => $self->retrieve_data('debug'),
+            year_start => $self->retrieve_data('year_start'),
+            localuse => $self->retrieve_data('localuse'),
         );
 
         print $cgi->header();
@@ -63,10 +61,8 @@ sub configure {
     else {
         $self->store_data(
             {
-                application_id       => $cgi->param('application_id'),
-                enable_opac_payments => $cgi->param('enable_opac_payments'),
-                url                  => $cgi->param('url'),
-                debug                => $cgi->param('debug'),
+                year_start       => $cgi->param('year_start'),
+                localuse         => $cgi->param('localuse'),
             }
         );
         $self->go_home();
@@ -124,30 +120,7 @@ sub intranet_js {
 sub install() {
     my ( $self, $args ) = @_;
 
-    my $dbh = C4::Context->dbh();
-
-    my $table = $self->get_qualified_table_name('tokens');
-    my $query = "
-		CREATE TABLE IF NOT EXISTS $table
-		  (
-			 token          VARCHAR(128),
-			 created_on     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			 borrowernumber INT(11) NOT NULL,
-             accountline_ids VARCHAR(255) NOT NULL,
-             amount         DECIMAL(28,6),
-             parcel         TEXT,
-             application_id VARCHAR(255),
-             security_id    VARCHAR(255) NULL DEFAULT NULL,
-			 PRIMARY KEY (token),
-			 CONSTRAINT token_bn FOREIGN KEY (borrowernumber) REFERENCES borrowers (
-			 borrowernumber ) ON DELETE CASCADE ON UPDATE CASCADE
-		  )
-		ENGINE=innodb
-		DEFAULT charset=utf8mb4
-		COLLATE=utf8mb4_unicode_ci;
-    ";
-
-    return $dbh->do( $query );
+    return 1;
 
 }
 

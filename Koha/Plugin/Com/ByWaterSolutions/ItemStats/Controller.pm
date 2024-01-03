@@ -42,29 +42,32 @@ sub get {
 
     my $itemnumber = $c->param('item_id');
 
-    my $year_start = '07-07';
+    my $item_stats = Koha::Plugin::Com::ByWaterSolutions::ItemStats->new();
+    my $localuse = $item_stats->retrieve_data('localuse');
+    my $types = $localuse ? q{"issue","renew","localuse"} : q{"issue","renew"};
+    my $year_start = sprintf('%02s',$item_stats->retrieve_data('year_start')) // '01';
     my $today = output_pref({ str=> dt_from_string, dateformat=>"sql",dateonly=>1 });
+    my $cur_month = substr($today,4,2);
     my $cur_year = substr($today,0,4);
-    $cur_year++ if( $cur_year . '-' . $year_start gt $cur_year . '-01-01' &&
-        $cur_year . '-' . $year_start lt $today );
+    $cur_year++ if( $cur_month > $year_start );
 
-    my $end_of_year = $cur_year . '-' . $year_start;
+    my $end_of_year = $cur_year . '-' . $year_start . '-01';
 
     my $dbh = C4::Context->dbh;
     
     return try {
 
         my $query = q{
-            SELECT YEAR(datetime) AS year, type, COUNT(*) AS total
+            SELECT IF( MONTH(datetime) < ?, YEAR(datetime), YEAR(datetime)+1 ) AS fiscal_year, type, COUNT(*) AS total
             FROM statistics
             WHERE
                 itemnumber = ?
                 AND DATE(datetime) > DATE_SUB( ?, INTERVAL 2 YEAR)
-                AND type IN ("issue","renew")
-            GROUP BY YEAR(datetime),type
         };
+        $query .= " AND type IN ($types) ";
+        $query .= " GROUP BY fiscal_year,type";
         my $sth = $dbh->prepare($query);
-        $sth->execute($itemnumber,$end_of_year);
+        $sth->execute( $year_start, $itemnumber, $end_of_year );
         my $results = $sth->fetchall_arrayref({});
         return $c->render(
             status => 200,
