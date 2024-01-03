@@ -1,0 +1,41 @@
+[% INCLUDE 'doc-head-open.inc' %]
+ <title>Koha: Plugin: Yearly stats: Configuration</title>
+[% INCLUDE 'doc-head-close.inc' %]
+</head>
+<body>
+[% INCLUDE 'header.inc' %]
+[% INCLUDE 'cat-search.inc' %]
+
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/plugins/plugins-home.pl">Plugins</a> &rsaquo; Yearly stats &rsaquo; Configuration</div>
+
+<div id="doc3">
+  <div class="container">
+    <form method="get">
+        <!-- Always pass these two parameters so the plugin system knows what to execute! -->
+        <input type="hidden" name="class" value="[% CLASS %]"/>
+        <input type="hidden" name="method" value="[% METHOD %]"/>
+
+        <div class="form-group">
+            <label for="year_start">Month year starts: </label>
+            <input class="form-control" type="number" name="year_start" min="1" max="12" value="[% year_start | html %]" />
+        </div>
+        <div class="form-group">
+            <label for="localuse">Include localuse statistics: </label>
+            <select name="localuse">
+                [% IF ( localuse ) %]
+                    <option value="1" selected="selected">Yes</option>
+                    <option value="0">No</option>
+                [% ELSE %]
+                    <option value="1">Yes</option>
+                    <option value="0" selected="selected">No</option>
+                [% END %]
+            </select>
+        </div>
+
+        <input type="hidden" name="save" value="1" />
+
+        <input class="btn btn-primary" type="submit" value="Save configuration" />
+    </form>
+  </div>
+
+[% INCLUDE 'intranet-bottom.inc' %]
